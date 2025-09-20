@@ -1,4 +1,3 @@
-ChatGPT ha detto:
 1) Overview
 
 Goal. Understand where hyperbolic geometry helps in a ViT-Tiny on CIFAR-100 by isolating each module’s contribution.
