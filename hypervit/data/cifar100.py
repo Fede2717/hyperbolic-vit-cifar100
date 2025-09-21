@@ -25,10 +25,6 @@ def get_transforms(train: bool = True, img_size: int = 32):
         ])
 
 def get_cifar100_loaders(cfg: Any) -> Tuple[DataLoader, DataLoader]:
-    """
-    Create CIFAR-100 train/val loaders using the same settings you used in your script.
-    Expects cfg.img_size, cfg.batch_size, cfg.num_workers.
-    """
     train_set = torchvision.datasets.CIFAR100(
         root="./data", train=True, download=True,
         transform=get_transforms(True, cfg.img_size)
@@ -38,7 +34,7 @@ def get_cifar100_loaders(cfg: Any) -> Tuple[DataLoader, DataLoader]:
         transform=get_transforms(False, cfg.img_size)
     )
 
-    pw = cfg.num_workers > 0  # persistent workers only if workers > 0
+    pw = cfg.num_workers > 0  
     train_loader = DataLoader(
         train_set,
         batch_size=cfg.batch_size,
