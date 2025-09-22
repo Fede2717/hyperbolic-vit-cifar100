@@ -8,6 +8,8 @@ import torchvision
 from torchvision import transforms
 from typing import Tuple
 
+from hypervit.data.cifar100 import get_cifar100_loaders
+
 # Reuse your training utilities
 from scripts.train import (
     Config, set_seed, build_model,
@@ -15,31 +17,7 @@ from scripts.train import (
 )
 
 # --- loaders ---
-def get_transforms(train: bool = False, img_size: int = 32):
-    if train:
-        return transforms.Compose([
-            transforms.RandomCrop(img_size, padding=4),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=(0.5071, 0.4865, 0.4409),
-                                 std=(0.2673, 0.2564, 0.2762)),
-        ])
-    else:
-        return transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(mean=(0.5071, 0.4865, 0.4409),
-                                 std=(0.2673, 0.2564, 0.2762)),
-        ])
-
-def get_cifar100_val_loader(cfg: Config) -> DataLoader:
-    val_set = torchvision.datasets.CIFAR100(
-        root="./data", train=False, download=True, transform=get_transforms(False, cfg.img_size)
-    )
-    val_loader = DataLoader(
-        val_set, batch_size=cfg.batch_size, shuffle=False,
-        num_workers=1, pin_memory=True
-    )
-    return val_loader
+val_loader = get_cifar100_loaders(cfg)[1]
 
 @torch.no_grad()
 def evaluate(model: nn.Module, loader: DataLoader, device: torch.device):
