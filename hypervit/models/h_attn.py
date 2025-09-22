@@ -5,7 +5,7 @@ from torch.amp import autocast
 import geoopt
 import geoopt.manifolds.stereographic.math as pmath
 
-from .h_lin_mlp import inv_softplus, pre_clip, post_clip, HyperbolicLinear
+from hypervit.utils.manifold import inv_softplus, pre_clip, post_clip
 
 class SharedHyperbolicCentroids(nn.Module):
     """
