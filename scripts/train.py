@@ -5,7 +5,7 @@
 import os
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True,max_split_size_mb:128"
 
-import random, time, math, argparse
+import random, time, math, argparse, yaml
 from dataclasses import dataclass
 from typing import Tuple
 
@@ -442,7 +442,16 @@ def main():
     args = parser.parse_args()
 
     # 1) build config and apply CLI overrides
+    parser.add_argument("-c","--config", type=str)
     cfg = Config()
+    if args.config:
+    with open("configs/base.yaml","r") as f: base = yaml.safe_load(f) or {}
+    with open(args.config,"r") as f: over = yaml.safe_load(f) or {}
+    merged = {**base, **over}
+    for k, v in merged.items():
+        if hasattr(cfg, k) and v is not None:
+            setattr(cfg, k, v)
+            
     if args.epochs is not None:        cfg.epochs = args.epochs
     if args.lr is not None:            cfg.lr = args.lr
     if args.batch_size is not None:    cfg.batch_size = args.batch_size
