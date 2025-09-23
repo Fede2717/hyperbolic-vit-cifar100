@@ -12,7 +12,7 @@ class HyperbolicHead(nn.Module):
     Hyperbolic Head using cls_scale and centroids for classification
     """
     def __init__(self, hamp: bool, dim: int, num_classes: int, init_c: float = 1.0, hyp_init_s: float = 1.0, init_cls_scale: float=0.1,
-                  eps: float = 1e-6, proto_std: float = 2e-2, clip_t: float: float = 0.985):
+                  eps: float = 1e-6, proto_std: float = 2e-2, clip_t: float = 0.985):
         super().__init__()
         self.sigma = nn.Parameter(inv_softplus(hyp_init_s), requires_grad=True) # param > 0
         self.eps = float(eps)
