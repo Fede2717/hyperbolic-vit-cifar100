@@ -1,0 +1,3 @@
+batch_size: 64
+eff_batch_size: 128
+hamp: true
