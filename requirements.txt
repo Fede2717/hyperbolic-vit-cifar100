@@ -4,3 +4,4 @@ geoopt>=0.5
 tqdm
 numpy
 Pillow
+pyyaml>=6.0,<7.0
