@@ -77,12 +77,6 @@ class Config:
     out_dir: str = "checkpoints"
 
 # ============================================================
-# CIFAR-100 Dataset & DataLoaders
-# ============================================================
-
-train_loader, val_loader = get_cifar100_loaders(cfg)
-
-# ============================================================
 # Hyper modules factories (closures on cfg)
 # ============================================================
 
