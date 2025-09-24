@@ -219,3 +219,18 @@ logs/
 *.pt
 *.pth
 *.ckpt
+
+# Artefatti di training (non committare)
+experiments/
+runs/
+checkpoints/
+weights/
+
+# Checkpoint/modelli
+*.pth
+*.pt
+*.ckpt
+
+# Log locali e TensorBoard
+*.log
+events.out.tfevents*
