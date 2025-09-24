@@ -6,6 +6,7 @@ import geoopt
 import geoopt.manifolds.stereographic.math as pmath
 
 from hypervit.utils.manifold import inv_softplus, pre_clip, post_clip
+from hypervit.models.h_lin_mlp import HyperbolicLinear
 
 class SharedHyperbolicCentroids(nn.Module):
     """
