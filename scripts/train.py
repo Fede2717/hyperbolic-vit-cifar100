@@ -459,7 +459,7 @@ def main():
     os.makedirs(cfg.out_dir, exist_ok=True)
 
     # 3) data
-    train_loader, val_loader = get_cifar100_loaders(cfg)
+    
 
     # 4) model (factories reflect the chosen variant)
     model = build_model(cfg, args.variant).to(device)
