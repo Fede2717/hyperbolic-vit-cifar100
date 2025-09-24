@@ -64,7 +64,7 @@ def main():
     else:
         model.load_state_dict(state, strict=True)
 
-    val_loader = get_cifar100_val_loader(cfg)
+    _, val_loader = get_cifar100_loaders(cfg)
     val_loss, top1, top5 = evaluate(model, val_loader, device)
     print(f"[EVAL] {args.variant} | loss={val_loss:.4f} | top1={top1:.2f} | top5={top5:.2f}")
 
