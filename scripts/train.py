@@ -433,6 +433,7 @@ def main():
     parser.add_argument("--amp", action="store_true")
     parser.add_argument("--hamp", action="store_true")
     parser.add_argument("--ckpt", type=str, default=None)   # optional resume/init weights
+    parser.add_argument("-c", "--config", type=str, default=None)
     args = parser.parse_args()
 
     # 1) build config and apply CLI overrides
@@ -459,7 +460,7 @@ def main():
     os.makedirs(cfg.out_dir, exist_ok=True)
 
     # 3) data
-    
+    train_loader, val_loader = get_cifar100_loaders(cfg)
 
     # 4) model (factories reflect the chosen variant)
     model = build_model(cfg, args.variant).to(device)
