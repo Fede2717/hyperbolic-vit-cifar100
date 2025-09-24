@@ -16,9 +16,6 @@ from scripts.train import (
     accuracy
 )
 
-# --- loaders ---
-val_loader = get_cifar100_loaders(cfg)[1]
-
 @torch.no_grad()
 def evaluate(model: nn.Module, loader: DataLoader, device: torch.device):
     model.eval()
