@@ -472,7 +472,7 @@ def main():
     parser.add_argument("--resume_from_epoch", type=int, default=0)
     parser.add_argument("--attn_phase", type=str, default=None, choices=["attn-only","full"])
     parser.add_argument("--non_strict_load", action="store_true")  
-    parser.add_argument("--progressive", action="store_true", help="Stack previous modules in study progression")
+    parser.add_argument("--progressive", action="store_true", default=True, help="Stack previous modules in study progression")
     args = parser.parse_args()
 
     # 1) build config and apply CLI overrides
