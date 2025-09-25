@@ -112,9 +112,10 @@ def make_factories(cfg: Config, variant: str):
     mlp_factory  = None
     attn_factory = None
 
+    # ---- HEAD ----
     if use_head:
-        def head_factory(D, C):
-            kwargs = dict(
+        def head_factory(D: int, C: int):
+            return HyperbolicHead(
                 hamp=cfg.hamp,
                 dim=D,
                 num_classes=C,
@@ -123,35 +124,49 @@ def make_factories(cfg: Config, variant: str):
                 init_cls_scale=cfg.init_cls_scale,
                 eps=1e-6,
                 proto_std=cfg.proto_std,
+                clip_t=cfg.t,
             )
-            # pass clip_t only when requested AND if class supports it
-            if clip_for_head is not None:
-                try:
-                    return HyperbolicHead(**kwargs, clip_t=clip_for_head)
-                except TypeError:
-                    pass  # class doesn't support clip_t -> fallback
-            return HyperbolicHead(**kwargs)
 
+    # ---- POS ----
     if use_pos:
-        def pos_factory(N, D, drop):
-                return HyperbolicPositionalEmbedding(
-                    num_tokens=N, dim=D, dropout=drop, init_c=cfg.hyp_init_c)
+        def pos_factory(N: int, D: int, drop: float):
+            return HyperbolicPositionalEmbedding(
+                hamp=cfg.hamp,
+                num_tokens=N,
+                dim=D,
+                dropout=drop,
+                init_c=cfg.hyp_init_c,
+                clip_t=cfg.t,
+            )
 
+    # ---- RESIDUAL (centered / no-center) ----
     if use_res:
         if variant == "hyp-residual-nocenter":
-            from hypervit.models.residual_nocenter import HyperbolicResidualNoCenter as ResCls
-        else:
-            from hypervit.models.residual import HyperbolicResidualAdd as ResCls
-        def res_factory():
-            return ResCls()
+            def res_factory():
+                return HyperbolicResidualNoCenter(
+                    hamp=cfg.hamp,
+                    init_c=cfg.hyp_init_c,
+                    clip_t=cfg.t,
+                )
+        else:  # centered by default
+            def res_factory():
+                return HyperbolicResidualAdd(
+                    hamp=cfg.hamp,
+                    init_c=cfg.hyp_init_c,
+                    clip_t=cfg.t,
+                )
 
+    # ---- MLP (H-MLP) ----
     if use_mlp:
-        def mlp_factory(D, ratio, drop):
+        def mlp_factory(D: int, ratio: float, drop: float):
             return HyperbolicFeedForward(
-                dim=D, mlp_ratio=ratio, drop=drop,
-                init_c=cfg.hyp_init_c, clip_t=cfg.t_default, hamp=cfg.hamp
+                hamp=cfg.hamp,
+                dim=D,
+                mlp_ratio=ratio,
+                drop=drop,
             )
 
+    # ---- ATTN (HMHA + Shared centroids) ----
     if use_attn:
         shared = SharedHyperbolicCentroids(
             heads=cfg.num_heads,
@@ -159,16 +174,21 @@ def make_factories(cfg: Config, variant: str):
             head_dim=cfg.embed_dim // cfg.num_heads,
             proto_std=cfg.proto_std,
         )
-        def attn_factory(D, H, attn_drop, proj_drop):
+        def attn_factory(D: int, H: int, attn_drop: float, proj_drop: float):
             return HyperbolicSelfAttention(
-                dim=D, heads=H,
-                attn_drop=attn_drop, proj_drop=proj_drop,
+                hamp=cfg.hamp,
+                dim=D,
+                heads=H,
+                attn_drop=attn_drop,
+                proj_drop=proj_drop,
                 shared=shared,
-                init_c=cfg.hyp_init_c, init_sigma=cfg.hyp_init_s,
-                clip_t=cfg.t_default, eps=1e-6, hamp=cfg.hamp
+                eps=1e-6,
+                init_c=cfg.hyp_init_c,
+                init_sigma=cfg.hyp_init_s,
+                clip_t=cfg.t,
             )
 
-    return head_factory, pos_factory, mlp_factory, attn_factory
+    return head_factory, pos_factory, res_factory, mlp_factory, attn_factory
 
 
 # ============================================================
