@@ -11,18 +11,19 @@ class HyperbolicResidualAdd(nn.Module):
     """
     x ⊕ (gamma ⊗_p y) with a learned center p and scale gamma.
     """
-    def __init__(self, init_c: float = 1.0):
+    def __init__(self, hamp: bool, init_c: float = 1.0):
         super().__init__()
         self.hrball = geoopt.PoincareBall(c=init_c, learnable=False)  # to avoid a "false learnable"
         self.curv_hra = nn.Parameter(inv_softplus(init_c))           # recorded parameter (Euclidean)
         self.gamma_raw = nn.Parameter(torch.tensor(0.0)) # x + gamma * y , but in the manifold
         self.gamma_scale = nn.Parameter(torch.tensor(0.0))  # g_max = 1 + softplus(...)
         self.scale_center = nn.Parameter(torch.tensor(0.0)) # center of add and mul, s = sigmoid(scale_center) in (0,1)
+        self.hamp = bool(hamp)
 
     def forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
         out_dtype = x.dtype
         x = x.float(); y = y.float() 
-        with autocast("cuda", enabled=False):
+        with autocast("cuda", enabled=self.hamp):
             self.hrball.isp_c = self.curv_hra
             ra_c = self.hrball.c
             hr_x = post_clip(self.hrball.expmap0(pre_clip(x, ra_c)),ra_c)
