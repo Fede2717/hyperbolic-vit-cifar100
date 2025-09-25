@@ -1,4 +1,3 @@
 batch_size: 32
 eff_batch_size: 128
-hamp: false
 out_dir: experiments/attn
