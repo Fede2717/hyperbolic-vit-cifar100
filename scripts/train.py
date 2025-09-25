@@ -257,6 +257,17 @@ def built_opt(model: nn.Module, cfg: Config):
     )
     return opt_euc, opt_man
 
+def ckpt_filename(variant: str) -> str:
+    table = {
+        "euclid": "w_euclid.pth",
+        "hyp-head": "h_head.pth",
+        "hyp-pos": "h_pos.pth",
+        "hyp-mlp": "h_linear.pth",
+        "hyp-residual-centered": "h_residual_centered.pth",
+        "hyp-residual-nocenter": "h_residual_nocenter.pth",
+        "hyp-all": "h_all.pth",
+    }
+    return table.get(variant, f"h_{variant.replace('hyp-','')}.pth")
 
 # ============================================================
 # Train loops (exactly your style, with accumulation support)
@@ -273,7 +284,7 @@ def train_euclid(cfg: Config, model: nn.Module, train_loader: DataLoader, val_lo
     best_val = float("inf")
     best_acc = 0.0  # acc1
     os.makedirs(cfg.out_dir, exist_ok=True)
-    best_path = os.path.join(cfg.out_dir, "w_vit_euclidean.pth")
+    best_path = os.path.join(cfg.out_dir, cfg.ckpt_name)
 
     for ep in range(1, cfg.epochs + 1):
         model.train()
@@ -361,7 +372,7 @@ def train_hyper(cfg: Config, model: nn.Module, train_loader: DataLoader, val_loa
     best_val = float("inf")
     best_acc = 0.0  # acc1
     os.makedirs(cfg.out_dir, exist_ok=True)
-    best_path = os.path.join(cfg.out_dir, "h_hyper_best.pth")
+    best_path = os.path.join(cfg.out_dir, cfg.ckpt_name)
 
     for ep in range(1, cfg.epochs + 1):
         model.train()
@@ -472,7 +483,9 @@ def main():
     if args.amp:                        cfg.amp = True
     if args.hamp:                       cfg.hamp = True
 
-
+    ckpt_name = ckpt_filename(args.variant)
+    setattr(cfg, "ckpt_name", ckpt_name)
+    
     # 2) seed, device, output dir
     set_seed(cfg.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
