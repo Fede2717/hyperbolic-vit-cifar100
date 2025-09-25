@@ -25,6 +25,7 @@ seed: 42
 init_cls_scale: 0.3
 hyp_init_c: 1.0
 hyp_init_s: 1.0
+t: 0.985 
 proto_std: 0.02
 # dir
 out_dir: checkpoints
