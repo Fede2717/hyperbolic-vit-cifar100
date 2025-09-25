@@ -514,7 +514,7 @@ def main():
     train_loader, val_loader = get_cifar100_loaders(cfg)
 
     # 4) model (factories reflect the chosen variant)
-    model = build_model(cfg, args.variant).to(device)
+    model = build_model(cfg, args.variant, progressive=args.progressive).to(device)
 
     # 5) optional: load checkpoint weights for fine-tuning or resume
     if args.ckpt and os.path.isfile(args.ckpt):
