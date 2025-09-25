@@ -336,11 +336,21 @@ def train_hyper(cfg: Config, model: nn.Module, train_loader: DataLoader, val_loa
         accum_steps = cfg.eff_batch_size // cfg.batch_size
     assert accum_steps >= 1
                     
-    updates_per_epoch = math.ceil(len(train_loader) / accum_steps)
-    total_steps = cfg.epochs * updates_per_epoch
-
-    scheduler_euc = torch.optim.lr_scheduler.CosineAnnealingLR(opt_euc, T_max=total_steps)
-    scheduler_man = torch.optim.lr_scheduler.CosineAnnealingLR(opt_man, T_max=total_steps)
+    steps_per_epoch = math.ceil(len(train_loader) / accum_steps)
+    use_total = args.total_epochs is not None
+    T_max_steps = (args.total_epochs * steps_per_epoch) if use_total else (cfg.epochs * steps_per_epoch)
+    last_steps  = (args.resume_from_epoch or 0) * steps_per_epoch
+        
+    scheduler_euc = torch.optim.lr_scheduler.CosineAnnealingLR(
+        opt_euc, T_max=T_max_steps, last_epoch=last_steps)
+    scheduler_man = torch.optim.lr_scheduler.CosineAnnealingLR(
+        opt_man, T_max=T_max_steps, last_epoch=last_steps)
+    
+    if last_steps > 0:
+        for g, lr in zip(opt_euc.param_groups, scheduler_euc.get_last_lr()):
+            g["lr"] = lr
+        for g, lr in zip(opt_man.param_groups, scheduler_man.get_last_lr()):
+            g["lr"] = lr
 
     euc_params = [p for g in opt_euc.param_groups for p in g["params"]]
     man_params = [p for g in opt_man.param_groups for p in g["params"]]
