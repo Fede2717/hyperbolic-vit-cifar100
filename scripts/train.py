@@ -502,13 +502,13 @@ def main():
     # 5) optional: load checkpoint weights for fine-tuning or resume
     if args.ckpt and os.path.isfile(args.ckpt):
         state = torch.load(args.ckpt, map_location="cpu")
-        # be strict by default for your flows
+        strict = not args.non_strict_load
         if isinstance(state, dict) and "model" in state:
-            model.load_state_dict(state["model"], strict=True)
-            print(f"=> Loaded state['model'] from {args.ckpt}")
+            model.load_state_dict(state["model"], strict=strict)
+            print(f"=> Loaded state['model'] from {args.ckpt} (strict={strict})")
         else:
-            model.load_state_dict(state, strict=True)
-            print(f"=> Loaded state_dict from {args.ckpt}")
+            model.load_state_dict(state, strict=strict)
+            print(f"=> Loaded state_dict from {args.ckpt} (strict={strict})")
 
     if args.variant == "hyp-attn" and args.attn_phase == "attn-only":
         unfreeze_attention_only(model)  
