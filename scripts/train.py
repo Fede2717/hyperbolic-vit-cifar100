@@ -500,8 +500,8 @@ def main():
         best_path = train_euclid(cfg, model, train_loader, val_loader, device)
     else:
         # hyper training uses two optimizers (Euclidean + Riemannian), like your scripts
-       opt_euc, opt_man = built_opt(model, cfg)
-       best_path = train_hyper(cfg, model, train_loader, val_loader, device, opt_euc, opt_man, args)
+        opt_euc, opt_man = built_opt(model, cfg)
+        best_path = train_hyper(cfg, model, train_loader, val_loader, device, opt_euc, opt_man, args)
         
     print(f"[DONE] Best checkpoint: {best_path}")
 
