@@ -183,14 +183,13 @@ def make_factories(cfg: Config, variant: str):
 # Build model from factories
 # ============================================================
 
-def build_model(cfg: Config, variant: str) -> nn.Module:
-    hf, pf, mf, af = make_factories(cfg, variant)
+def build_model(cfg: Config, variant: str, progressive: bool) -> nn.Module:
+    hf, pf, mf, af = make_factories(cfg, variant, progressive=progressive)
     kwargs = {}
     if hf is not None: kwargs["head_factory"] = hf
     if pf is not None: kwargs["pos_factory"]  = pf
     if mf is not None: kwargs["mlp_factory"]  = mf
     if af is not None: kwargs["attn_factory"] = af
-    # residual_factory: usa i default euclidei finché non avrai il modulo hyper-residual
     model = CifarViT(cfg, **kwargs)
     return model
 
