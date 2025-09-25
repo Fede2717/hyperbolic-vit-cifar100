@@ -300,6 +300,7 @@ def ckpt_filename(variant: str) -> str:
         "hyp-pos": "h_pos.pth",
         "hyp-residual-centered": "h_residual_centered.pth",
         "hyp-residual-nocenter": "h_residual_nocenter.pth",
+        "hyp-only-residual-centered": "h_only_residual_centered.pth",
         "hyp-mlp": "h_linear.pth",
         "hyp-all": "h_all.pth",
     }
