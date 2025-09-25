@@ -29,8 +29,7 @@ class HyperbolicSelfAttention(nn.Module):
     """
     def __init__(
         self, hamp: bool, dim: int, heads: int = 3, attn_drop: float = 0.0, proj_drop: float = 0.0, shared: SharedHyperbolicCentroids = None,
-          eps : float = 1e-6, init_c : float = 1.0, init_sigma: float = 1.0
-    ):
+          eps : float = 1e-6, init_c : float = 1.0, init_sigma: float = 1.0, clip_t : float = 0.985):
         super().__init__()
         assert dim % heads == 0
         self.heads = heads
@@ -47,6 +46,7 @@ class HyperbolicSelfAttention(nn.Module):
         self.curv_attn = nn.Parameter(inv_softplus(init_c))  
         self.sigma_raw = nn.Parameter(inv_softplus(init_sigma) * torch.ones(heads))
         self.hamp = bool(hamp)
+        self.clip_t = clip_t
 
     def _split_heads(self, x: torch.Tensor) -> torch.Tensor:
         B, N, D = x.shape
@@ -70,9 +70,9 @@ class HyperbolicSelfAttention(nn.Module):
             V_aug = torch.cat([v, C_b], dim=2)  # (B,H,N+M,Hd)
             self.attnball.isp_c = self.curv_attn
             c_attn = self.attnball.c.to(dtype=out_dtype)
-            q_h = post_clip(self.attnball.expmap0(pre_clip(q,     c_attn)), c_attn).to(dtype=q.dtype)  # (B,H,N,Hd)
-            K_h = post_clip(self.attnball.expmap0(pre_clip(K_aug, c_attn)), c_attn).to(dtype=q.dtype)  # (B,H,N+M,Hd), J =N+M
-            V_h = post_clip(self.attnball.expmap0(pre_clip(V_aug, c_attn)), c_attn).to(dtype=q.dtype)  # (B,H,N+M,Hd)
+            q_h = post_clip(self.attnball.expmap0(pre_clip(q, c_attn, self.clip_t)), c_attn, self.clip_t).to(dtype=q.dtype)  # (B,H,N,Hd)
+            K_h = post_clip(self.attnball.expmap0(pre_clip(K_aug, c_attn, self.clip_t)), c_attn, self.clip_t).to(dtype=q.dtype)  # (B,H,N+M,Hd), J =N+M
+            V_h = post_clip(self.attnball.expmap0(pre_clip(V_aug, c_attn, self.clip_t)), c_attn, self.clip_t).to(dtype=q.dtype)  # (B,H,N+M,Hd)
             d_attn = self.attnball.dist(q_h.unsqueeze(3), K_h.unsqueeze(2)).to(dtype=q.dtype)  
             sigma = (F.softplus(self.sigma_raw) + self.eps).reshape(1, H, 1, 1).to(dtype=q.dtype)  # (1,H,1,1)
             S = (- (d_attn ** 2) / (2.0 * sigma ** 2)).to(dtype=q.dtype)  # (B,H,N,N+M)
