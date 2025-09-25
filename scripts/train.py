@@ -324,8 +324,8 @@ def train_euclid(cfg: Config, model: nn.Module, train_loader: DataLoader, val_lo
     return best_path
 
 
-def train_hyper(cfg: Config, model: nn.Module, train_loader: DataLoader, val_loader: DataLoader, device: torch.device,
-                opt_euc: torch.optim.Optimizer, opt_man: geoopt.optim.RiemannianAdam):
+def train_hyper(cfg: Config, model: nn.Module, train_loader: DataLoader, val_loader: DataLoader,
+                device: torch.device, opt_euc: torch.optim.Optimizer, opt_man: geoopt.optim.RiemannianAdam, args):
     model.to(device)
 
     # accumulation (exactly like your attn2)
@@ -334,7 +334,8 @@ def train_hyper(cfg: Config, model: nn.Module, train_loader: DataLoader, val_loa
     else:
         assert cfg.eff_batch_size % cfg.batch_size == 0, "eff_batch_size must be multiple of batch_size"
         accum_steps = cfg.eff_batch_size // cfg.batch_size
-
+    assert accum_steps >= 1
+                    
     updates_per_epoch = math.ceil(len(train_loader) / accum_steps)
     total_steps = cfg.epochs * updates_per_epoch
 
@@ -355,6 +356,10 @@ def train_hyper(cfg: Config, model: nn.Module, train_loader: DataLoader, val_loa
     for ep in range(1, cfg.epochs + 1):
         model.train()
         run_loss = 0.0
+
+        if args.variant == "hyp-mlp" and (not cfg.hamp) and ep == 2:
+            set_hamp_flag(model, True)
+            cfg.hamp = True
 
         start_t = time.perf_counter()
         seen_imgs = 0
@@ -434,25 +439,29 @@ def main():
     parser.add_argument("--hamp", action="store_true")
     parser.add_argument("--ckpt", type=str, default=None)   # optional resume/init weights
     parser.add_argument("-c", "--config", type=str, default=None)
+    parser.add_argument("--total_epochs", type=int, default=None)
+    parser.add_argument("--resume_from_epoch", type=int, default=0)
     args = parser.parse_args()
 
     # 1) build config and apply CLI overrides
-    parser.add_argument("-c","--config", type=str)
     cfg = Config()
     if args.config:
-    with open("configs/base.yaml","r") as f: base = yaml.safe_load(f) or {}
-    with open(args.config,"r") as f: over = yaml.safe_load(f) or {}
-    merged = {**base, **over}
-    for k, v in merged.items():
-        if hasattr(cfg, k) and v is not None:
-            setattr(cfg, k, v)
-            
-    if args.epochs is not None:        cfg.epochs = args.epochs
-    if args.lr is not None:            cfg.lr = args.lr
-    if args.batch_size is not None:    cfg.batch_size = args.batch_size
+        with open("configs/base.yaml", "r") as f:
+            base = yaml.safe_load(f) or {}
+        with open(args.config, "r") as f:
+            over = yaml.safe_load(f) or {}
+        merged = {**base, **over}
+        for k, v in merged.items():
+            if hasattr(cfg, k) and v is not None:
+                setattr(cfg, k, v)
+    
+    if args.epochs is not None:         cfg.epochs = args.epochs
+    if args.lr is not None:             cfg.lr = args.lr
+    if args.batch_size is not None:     cfg.batch_size = args.batch_size
     if args.eff_batch_size is not None: cfg.eff_batch_size = args.eff_batch_size
-    if args.amp:                       cfg.amp = True
-    if args.hamp:                      cfg.hamp = True
+    if args.amp:                        cfg.amp = True
+    if args.hamp:                       cfg.hamp = True
+
 
     # 2) seed, device, output dir
     set_seed(cfg.seed)
@@ -481,9 +490,9 @@ def main():
         best_path = train_euclid(cfg, model, train_loader, val_loader, device)
     else:
         # hyper training uses two optimizers (Euclidean + Riemannian), like your scripts
-        opt_euc, opt_man = built_opt(model, cfg)
-        best_path = train_hyper(cfg, model, train_loader, val_loader, device, opt_euc, opt_man)
-
+       opt_euc, opt_man = built_opt(model, cfg)
+       best_path = train_hyper(cfg, model, train_loader, val_loader, device, opt_euc, opt_man, args)
+        
     print(f"[DONE] Best checkpoint: {best_path}")
 
 
