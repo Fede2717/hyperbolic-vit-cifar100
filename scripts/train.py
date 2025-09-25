@@ -93,6 +93,23 @@ def make_factories(cfg: Config, variant: str):
     use_mlp  = variant in {"hyp-mlp", "hyp-all"}
     use_attn = variant in {"hyp-attn", "hyp-all"}
 
+    if progressive:
+        order = ["head", "pos", "res", "mlp", "attn"]
+        stage_of = {
+            "hyp-head": "head",
+            "hyp-pos": "pos",
+            "hyp-mlp": "mlp",
+            "hyp-attn": "attn",
+            "hyp-all": "attn",  
+        }
+        stage = stage_of.get(variant, None)
+        if stage is not None:
+            idx = order.index(stage)
+            use_head = idx >= order.index("head")
+            use_pos  = idx >= order.index("pos")
+            use_mlp  = idx >= order.index("mlp")
+            use_attn = idx >= order.index("attn")
+
     head_factory = None
     pos_factory  = None
     mlp_factory  = None
@@ -464,6 +481,7 @@ def main():
     parser.add_argument("--resume_from_epoch", type=int, default=0)
     parser.add_argument("--attn_phase", type=str, default=None, choices=["attn-only","full"])
     parser.add_argument("--non_strict_load", action="store_true")  
+    parser.add_argument("--progressive", action="store_true", help="Stack previous modules in study progression")
     args = parser.parse_args()
 
     # 1) build config and apply CLI overrides
