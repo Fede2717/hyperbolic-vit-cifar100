@@ -10,7 +10,7 @@ class HyperbolicLinear(nn.Module):
     """
     using y = p_out ⊕ mobius_matvec(W, (-p_in) ⊕ x) ⊕ exp0(b)
     """
-    def __init__(self, hamp: bool, in_features: int, out_features: int, init_c: float = 1.0):
+    def __init__(self, hamp: bool, in_features: int, out_features: int, init_c: float = 1.0, clip_t : float = 0.985):
         super().__init__()
         self.hlball = geoopt.PoincareBall(c=init_c, learnable=False)   # to avoid a "false learnable"
         self.curv_hlin = nn.Parameter(inv_softplus(init_c))            # recorded parameter (Euclidean)
@@ -18,6 +18,7 @@ class HyperbolicLinear(nn.Module):
         self.p_in  = geoopt.ManifoldParameter(torch.zeros(1, 1, in_features), manifold=self.hlball, requires_grad=True)   # domain's center 
         self.p_out = geoopt.ManifoldParameter(torch.zeros(1, 1, out_features), manifold=self.hlball, requires_grad=True)  # codomain's center 
         self.hamp = bool(hamp)
+        self.clip_t = clip_t
         
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         out_dtype = x.dtype
@@ -30,11 +31,11 @@ class HyperbolicLinear(nn.Module):
             p_out = self.hlball.projx(self.p_out).to(hx.dtype) # codomain's center on manifold
             # y = p_out + mobius_matvec(W, (-p_in) + x) + exp0(b)
             x_p = self.hlball.mobius_add(-p_in, hx)                           # (-p_in) + x
-            h   = post_clip(self.hlball.mobius_matvec(self.lin.weight, x_p),c)            # W * x_p
-            b_h = self.hlball.expmap0(pre_clip(self.lin.bias, c))[None, None, :] # exp0(b), (1,1,D0) for broadcasting
+            h   = post_clip(self.hlball.mobius_matvec(self.lin.weight, x_p), c. self.clip_t)            # W * x_p
+            b_h = self.hlball.expmap0(pre_clip(self.lin.bias, c, self.clip_t))[None, None, :] # exp0(b), (1,1,D0) for broadcasting
             h = self.hlball.mobius_add(h, b_h)                           # (… ) + exp0(b)
             h = self.hlball.mobius_add(p_out, h)                              # p_out + (…)
-            h = post_clip(h, c)
+            h = post_clip(h, c, self.clip_t)
             e = self.hlball.logmap0(h)                                       # to euclidean
         return e.to(dtype=out_dtype)
 
