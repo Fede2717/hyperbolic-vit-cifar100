@@ -29,6 +29,8 @@ from hypervit.models.head import HyperbolicHead
 from hypervit.models.pos import HyperbolicPositionalEmbedding   
 from hypervit.models.h_lin_mlp import HyperbolicFeedForward     
 from hypervit.models.h_attn import HyperbolicSelfAttention, SharedHyperbolicCentroids 
+from hypervit.models.residual_nocenter import HyperbolicResidualNoCenter 
+from hypervit.models.residual import HyperbolicResidualAdd 
 
 # ============================================================
 # Hyperparameters and general
@@ -90,23 +92,26 @@ def make_factories(cfg: Config, variant: str):
     """
     use_head = variant in {"hyp-head", "hyp-all"}
     use_pos  = variant in {"hyp-pos", "hyp-all"}
+    use_res  = variant in {"hyp-residual-centered", "hyp-residual-nocenter", "hyp-all"}
     use_mlp  = variant in {"hyp-mlp", "hyp-all"}
     use_attn = variant in {"hyp-attn", "hyp-all"}
 
-    if progressive:
-        order = ["head", "pos", "res", "mlp", "attn"]
+    order = ["head", "pos", "res", "mlp", "attn"]
         stage_of = {
             "hyp-head": "head",
             "hyp-pos": "pos",
             "hyp-mlp": "mlp",
             "hyp-attn": "attn",
-            "hyp-all": "attn",  
+            "hyp-residual-centered": "res",
+            "hyp-residual-nocenter": "res",
+            "hyp-all": "attn",
         }
         stage = stage_of.get(variant, None)
         if stage is not None:
             idx = order.index(stage)
             use_head = idx >= order.index("head")
             use_pos  = idx >= order.index("pos")
+            use_res  = idx >= order.index("res")
             use_mlp  = idx >= order.index("mlp")
             use_attn = idx >= order.index("attn")
 
@@ -114,15 +119,9 @@ def make_factories(cfg: Config, variant: str):
     pos_factory  = None
     mlp_factory  = None
     attn_factory = None
+    res_factory  = None
 
     if use_head:
-        # decide which t to attempt for the head
-        clip_for_head = None
-        if use_pos:
-            clip_for_head = cfg.t_pos      # head+pos => use positional t
-        elif variant == "hyp-head":
-            clip_for_head = cfg.t_head     # head-only => use head t
-
         def head_factory(D, C):
             kwargs = dict(
                 hamp=cfg.hamp,
@@ -144,14 +143,16 @@ def make_factories(cfg: Config, variant: str):
 
     if use_pos:
         def pos_factory(N, D, drop):
-            try:
                 return HyperbolicPositionalEmbedding(
-                    num_tokens=N, dim=D, dropout=drop, init_c=cfg.hyp_init_c, clip_t=cfg.t_pos
-                )
-            except TypeError:
-                return HyperbolicPositionalEmbedding(
-                    num_tokens=N, dim=D, dropout=drop, init_c=cfg.hyp_init_c
-                )
+                    num_tokens=N, dim=D, dropout=drop, init_c=cfg.hyp_init_c)
+
+    if use_res:
+        if variant == "hyp-residual-nocenter":
+            from hypervit.models.residual_nocenter import HyperbolicResidualNoCenter as ResCls
+        else:
+            from hypervit.models.residual import HyperbolicResidualAdd as ResCls
+        def res_factory():
+            return ResCls()
 
     if use_mlp:
         def mlp_factory(D, ratio, drop):
@@ -184,10 +185,11 @@ def make_factories(cfg: Config, variant: str):
 # ============================================================
 
 def build_model(cfg: Config, variant: str, progressive: bool) -> nn.Module:
-    hf, pf, mf, af = make_factories(cfg, variant, progressive=progressive)
+    hf, pf, rf, mf, af = make_factories(cfg, variant, progressive=progressive)
     kwargs = {}
     if hf is not None: kwargs["head_factory"] = hf
     if pf is not None: kwargs["pos_factory"]  = pf
+    if rf is not None: kwargs["residual_factory"] = rf
     if mf is not None: kwargs["mlp_factory"]  = mf
     if af is not None: kwargs["attn_factory"] = af
     model = CifarViT(cfg, **kwargs)
@@ -355,7 +357,7 @@ def train_hyper(cfg: Config, model: nn.Module, train_loader: DataLoader, val_loa
                 device: torch.device, opt_euc: torch.optim.Optimizer, opt_man: geoopt.optim.RiemannianAdam, args):
     model.to(device)
 
-    # accumulation (exactly like your attn2)
+    # accumulation 
     if cfg.eff_batch_size is None or cfg.eff_batch_size <= cfg.batch_size:
         accum_steps = 1
     else:
@@ -467,7 +469,7 @@ def train_hyper(cfg: Config, model: nn.Module, train_loader: DataLoader, val_loa
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--variant", type=str, default="euclid",
-                        choices=["euclid", "hyp-head", "hyp-pos", "hyp-mlp", "hyp-attn", "hyp-all"])
+                        choices=["euclid", "hyp-head", "hyp-pos", "hyp-residual-centered", "hyp-residual-nocenter", "hyp-mlp", "hyp-attn", "hyp-all"])
     parser.add_argument("--epochs", type=int, default=None)
     parser.add_argument("--lr", type=float, default=None)
     parser.add_argument("--batch_size", type=int, default=None)
