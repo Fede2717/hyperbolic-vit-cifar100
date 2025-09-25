@@ -1,3 +1,4 @@
 batch_size: 64
 eff_batch_size: 128
-hamp: true
+hamp: false
+out_dir: experiments/linear
