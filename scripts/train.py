@@ -71,8 +71,6 @@ class Config:
     init_cls_scale: float=0.3
     hyp_init_c: float = 1.0
     hyp_init_s: float = 1.0 
-    t_head: float = 0.96
-    t_pos: float = 0.98
     t_default: float = 0.985
     proto_std: float = 2e-2
     # dir
@@ -100,10 +98,10 @@ def make_factories(cfg: Config, variant: str):
         stage_of = {
             "hyp-head": "head",
             "hyp-pos": "pos",
-            "hyp-mlp": "mlp",
-            "hyp-attn": "attn",
             "hyp-residual-centered": "res",
             "hyp-residual-nocenter": "res",
+            "hyp-mlp": "mlp",
+            "hyp-attn": "attn",
             "hyp-all": "attn",
         }
         stage = stage_of.get(variant, None)
