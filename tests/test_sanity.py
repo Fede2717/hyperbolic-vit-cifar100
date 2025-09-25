@@ -32,7 +32,6 @@ def test_accuracy_and_evaluate():
 
 def test_progressive_builds():
     cfg = Config()
-    # hyp-mlp + progressive = head+pos(+res quando lo colleghi)+mlp
     model = build_model(cfg, variant="hyp-mlp", progressive=True)
     assert model is not None
 
