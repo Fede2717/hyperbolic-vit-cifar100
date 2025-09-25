@@ -71,7 +71,7 @@ class Config:
     init_cls_scale: float=0.3
     hyp_init_c: float = 1.0
     hyp_init_s: float = 1.0 
-    t_default: float = 0.985
+    t: float = 0.985
     proto_std: float = 2e-2
     # dir
     out_dir: str = "checkpoints"
