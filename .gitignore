@@ -234,3 +234,11 @@ weights/
 # Log locali e TensorBoard
 *.log
 events.out.tfevents*
+
+/weights/*
+!/weights/.gitkeep
+/experiments/
+runs/
+/checkpoints/
+*.pth
+
