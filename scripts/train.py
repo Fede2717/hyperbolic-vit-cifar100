@@ -462,6 +462,8 @@ def main():
     parser.add_argument("-c", "--config", type=str, default=None)
     parser.add_argument("--total_epochs", type=int, default=None)
     parser.add_argument("--resume_from_epoch", type=int, default=0)
+    parser.add_argument("--attn_phase", type=str, default=None, choices=["attn-only","full"])
+    parser.add_argument("--non_strict_load", action="store_true")  
     args = parser.parse_args()
 
     # 1) build config and apply CLI overrides
@@ -508,6 +510,9 @@ def main():
             model.load_state_dict(state, strict=True)
             print(f"=> Loaded state_dict from {args.ckpt}")
 
+    if args.variant == "hyp-attn" and args.attn_phase == "attn-only":
+        unfreeze_attention_only(model)  
+ 
     # 6) train according to variant
     if args.variant == "euclid":
         best_path = train_euclid(cfg, model, train_loader, val_loader, device)
