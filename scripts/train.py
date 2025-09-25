@@ -96,23 +96,23 @@ def make_factories(cfg: Config, variant: str, progressive: bool):
         
     if progressive and variant != "hyp-only-residual-centered":
         order = ["head", "pos", "res", "mlp", "attn"]
-            stage_of = {
-                "hyp-head": "head",
-                "hyp-pos": "pos",
-                "hyp-residual-centered": "res",
-                "hyp-residual-nocenter": "res",
-                "hyp-mlp": "mlp",
-                "hyp-attn": "attn",
-                "hyp-all": "attn",
-            }
-            stage = stage_of.get(variant, None)
-            if stage is not None:
-                idx = order.index(stage)
-                use_head = idx >= order.index("head")
-                use_pos  = idx >= order.index("pos")
-                use_res  = idx >= order.index("res")
-                use_mlp  = idx >= order.index("mlp")
-                use_attn = idx >= order.index("attn")
+        stage_of = {
+            "hyp-head": "head",
+            "hyp-pos": "pos",
+            "hyp-residual-centered": "res",
+            "hyp-residual-nocenter": "res",
+            "hyp-mlp": "mlp",
+            "hyp-attn": "attn",
+            "hyp-all": "attn",
+        }
+        stage = stage_of.get(variant, None)
+        if stage is not None:
+            idx = order.index(stage)
+            use_head = idx >= order.index("head")
+            use_pos  = idx >= order.index("pos")
+            use_res  = idx >= order.index("res")
+            use_mlp  = idx >= order.index("mlp")
+            use_attn = idx >= order.index("attn")
 
     head_factory = None
     pos_factory  = None
