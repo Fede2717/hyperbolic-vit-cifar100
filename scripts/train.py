@@ -81,13 +81,6 @@ class Config:
 # ============================================================
 
 def make_factories(cfg: Config, variant: str):
-    """
-    Build factories for optional hyperbolic modules.
-    We only pass `clip_t` to the head if:
-      - head-only:           use cfg.t_head
-      - head + positional:   use cfg.t_pos
-      - otherwise:           do not pass (class default)
-    """
     use_head = variant in {"hyp-head", "hyp-all"}
     use_pos  = variant in {"hyp-pos", "hyp-all"}
     use_res  = variant in {"hyp-residual-centered", "hyp-residual-nocenter", "hyp-all"}
@@ -115,9 +108,9 @@ def make_factories(cfg: Config, variant: str):
 
     head_factory = None
     pos_factory  = None
+    res_factory  = None
     mlp_factory  = None
     attn_factory = None
-    res_factory  = None
 
     if use_head:
         def head_factory(D, C):
@@ -245,7 +238,6 @@ def freeze_all(model: nn.Module):
 
 def unfreeze_attention_only(model: nn.Module):
     freeze_all(model)
-    # optional shared centroids attr name could differ; guard it:
     if hasattr(model, "shared_centroids_"):
         for p in model.shared_centroids_.parameters():
             p.requires_grad = True
@@ -278,9 +270,9 @@ def ckpt_filename(variant: str) -> str:
         "euclid": "w_euclid.pth",
         "hyp-head": "h_head.pth",
         "hyp-pos": "h_pos.pth",
-        "hyp-mlp": "h_linear.pth",
         "hyp-residual-centered": "h_residual_centered.pth",
         "hyp-residual-nocenter": "h_residual_nocenter.pth",
+        "hyp-mlp": "h_linear.pth",
         "hyp-all": "h_all.pth",
     }
     return table.get(variant, f"h_{variant.replace('hyp-','')}.pth")
