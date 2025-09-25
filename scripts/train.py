@@ -27,10 +27,10 @@ torch.backends.cudnn.allow_tf32 = True
 from hypervit.models.vit_tiny import CifarViT
 from hypervit.models.head import HyperbolicHead                 
 from hypervit.models.pos import HyperbolicPositionalEmbedding   
-from hypervit.models.h_lin_mlp import HyperbolicFeedForward     
-from hypervit.models.h_attn import HyperbolicSelfAttention, SharedHyperbolicCentroids 
 from hypervit.models.residual_nocenter import HyperbolicResidualNoCenter 
 from hypervit.models.residual import HyperbolicResidualAdd 
+from hypervit.models.h_lin_mlp import HyperbolicFeedForward     
+from hypervit.models.h_attn import HyperbolicSelfAttention, SharedHyperbolicCentroids 
 
 # ============================================================
 # Hyperparameters and general
