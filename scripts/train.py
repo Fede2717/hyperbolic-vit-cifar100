@@ -80,31 +80,39 @@ class Config:
 # Hyper modules factories (closures on cfg)
 # ============================================================
 
-def make_factories(cfg: Config, variant: str):
+def make_factories(cfg: Config, variant: str, progressive: bool):
     use_head = variant in {"hyp-head", "hyp-all"}
     use_pos  = variant in {"hyp-pos", "hyp-all"}
     use_res  = variant in {"hyp-residual-centered", "hyp-residual-nocenter", "hyp-all"}
     use_mlp  = variant in {"hyp-mlp", "hyp-all"}
     use_attn = variant in {"hyp-attn", "hyp-all"}
 
-    order = ["head", "pos", "res", "mlp", "attn"]
-        stage_of = {
-            "hyp-head": "head",
-            "hyp-pos": "pos",
-            "hyp-residual-centered": "res",
-            "hyp-residual-nocenter": "res",
-            "hyp-mlp": "mlp",
-            "hyp-attn": "attn",
-            "hyp-all": "attn",
-        }
-        stage = stage_of.get(variant, None)
-        if stage is not None:
-            idx = order.index(stage)
-            use_head = idx >= order.index("head")
-            use_pos  = idx >= order.index("pos")
-            use_res  = idx >= order.index("res")
-            use_mlp  = idx >= order.index("mlp")
-            use_attn = idx >= order.index("attn")
+    if variant == "hyp-only-residual-centered":
+        use_head = False
+        use_pos  = False
+        use_mlp  = False
+        use_attn = False
+        use_res  = True
+        
+    if progressive and variant != "hyp-only-residual-centered":
+        order = ["head", "pos", "res", "mlp", "attn"]
+            stage_of = {
+                "hyp-head": "head",
+                "hyp-pos": "pos",
+                "hyp-residual-centered": "res",
+                "hyp-residual-nocenter": "res",
+                "hyp-mlp": "mlp",
+                "hyp-attn": "attn",
+                "hyp-all": "attn",
+            }
+            stage = stage_of.get(variant, None)
+            if stage is not None:
+                idx = order.index(stage)
+                use_head = idx >= order.index("head")
+                use_pos  = idx >= order.index("pos")
+                use_res  = idx >= order.index("res")
+                use_mlp  = idx >= order.index("mlp")
+                use_attn = idx >= order.index("attn")
 
     head_factory = None
     pos_factory  = None
@@ -479,7 +487,7 @@ def train_hyper(cfg: Config, model: nn.Module, train_loader: DataLoader, val_loa
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--variant", type=str, default="euclid",
-                        choices=["euclid", "hyp-head", "hyp-pos", "hyp-residual-centered", "hyp-residual-nocenter", "hyp-mlp", "hyp-attn", "hyp-all"])
+                        choices=["euclid", "hyp-head", "hyp-pos", "hyp-residual-centered", "hyp-residual-nocenter",  "hyp-only-residual-centered", "hyp-mlp", "hyp-attn", "hyp-all"])
     parser.add_argument("--epochs", type=int, default=None)
     parser.add_argument("--lr", type=float, default=None)
     parser.add_argument("--batch_size", type=int, default=None)
