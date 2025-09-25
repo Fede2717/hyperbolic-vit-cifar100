@@ -9,7 +9,7 @@ from hypervit.utils.manifold import inv_softplus, pre_clip, post_clip
 # HyperbolicPositionalEmbedding (learnable + dropout)
 class HyperbolicPositionalEmbedding(nn.Module):
     """HyperbolicPE learnable"""
-    def __init__(self, num_tokens: int, dim: int, dropout: float = 0.0, init_c: float = 1.0, clip_t: float = 0.985):
+    def __init__(self, hamp: bool, num_tokens: int, dim: int, dropout: float = 0.0, init_c: float = 1.0, clip_t: float = 0.985):
         super().__init__()
         self.pos = nn.Parameter(torch.zeros(1, num_tokens, dim)) # (1,N,D), N = num_tokens = tokens img + cls
         nn.init.trunc_normal_(self.pos, std=0.02) #like in a ViT, near the origin
@@ -17,9 +17,10 @@ class HyperbolicPositionalEmbedding(nn.Module):
         self.pball = geoopt.PoincareBall(c=init_c, learnable=False)
         self.curv_pe = nn.Parameter(inv_softplus(init_c))           # recorded parameter (Euclidean)
         self.clip_t = float(clip_t)
+        self.hamp = bool(hamp)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        with autocast("cuda", enabled=False):
+        with autocast("cuda", enabled=self.hamp):
             self.pball.isp_c = self.curv_pe
             c = self.pball.c
             x = pre_clip(x, c, t=self.clip_t)
