@@ -5,3 +5,5 @@ tqdm
 numpy
 Pillow
 pyyaml>=6.0,<7.0
+pytest
+pytest-cov
