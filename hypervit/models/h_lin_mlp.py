@@ -31,7 +31,7 @@ class HyperbolicLinear(nn.Module):
             p_out = self.hlball.projx(self.p_out).to(hx.dtype) # codomain's center on manifold
             # y = p_out + mobius_matvec(W, (-p_in) + x) + exp0(b)
             x_p = self.hlball.mobius_add(-p_in, hx)                           # (-p_in) + x
-            h   = post_clip(self.hlball.mobius_matvec(self.lin.weight, x_p), c. self.clip_t)            # W * x_p
+            h   = post_clip(self.hlball.mobius_matvec(self.lin.weight, x_p), c, self.clip_t)            # W * x_p
             b_h = self.hlball.expmap0(pre_clip(self.lin.bias, c, self.clip_t))[None, None, :] # exp0(b), (1,1,D0) for broadcasting
             h = self.hlball.mobius_add(h, b_h)                           # (… ) + exp0(b)
             h = self.hlball.mobius_add(p_out, h)                              # p_out + (…)
