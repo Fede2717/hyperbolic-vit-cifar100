@@ -28,7 +28,7 @@ We operate on the **Poincaré ball**; each hyperbolic block has its own (fixed o
 - **Batching.** Effective batch size 128 (gradient accumulation where needed).
 - **Optimizers.** Euclidean params → AdamW; manifold params → Geoopt RiemannianAdam; separate grad clipping.
 - **Precision.** AMP on; optional *hAMP* inside hyperbolic ops.
-- **Clipping.** Typical margins: head 0.96, positional 0.98, others 0.985; when head+pos are both hyperbolic, head uses `t=0.98`.
+- **Clipping.** `t=0.985`.
 
 ## 4. Variants (what to run)
 We expose ablations via `--variant`:
