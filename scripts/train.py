@@ -264,14 +264,16 @@ def freeze_all(model: nn.Module):
     for p in model.parameters():
         p.requires_grad = False
 
-def unfreeze_attention_only(model: nn.Module):
-    freeze_all(model)
-    if hasattr(model, "shared_centroids_"):
-        for p in model.shared_centroids_.parameters():
-            p.requires_grad = True
-    from hypervit.models.h_attn import HyperbolicSelfAttention
+def unfreeze_attention_only(model: torch.nn.Module):
+    for p in model.parameters():
+        p.requires_grad = False
+
     for m in model.modules():
         if isinstance(m, HyperbolicSelfAttention):
+            for p in m.parameters():
+                p.requires_grad = True
+
+        if isinstance(m, SharedHyperbolicCentroids):
             for p in m.parameters():
                 p.requires_grad = True
 
