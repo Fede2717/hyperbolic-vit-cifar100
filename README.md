@@ -12,7 +12,7 @@
 - **Backbone.** ViT‑Tiny: 12 blocks, 3 heads, embed dim 192, patch size 4. LayerNorm remains Euclidean.
 
 ## 2. Hyperbolic Modules (what we swap)
-We operate on the **Poincaré ball**; each hyperbolic block has its own (fixed or learnable) curvature. We enforce **pre/post clipping** with margin `t∈(0,1)` around exp/log maps and use AMP by default (optional *hAMP* inside manifold ops).
+We operate on the **Poincaré ball**; each hyperbolic block has its own (fixed or learnable) curvature. We enforce **pre/post clipping** around exp/log maps and use AMP by default (optional *hAMP* inside manifold ops).
 
 - **Residual (three modes).**
   - **No‑center (Hyp).** Mӧbius add around the origin: `x ⊕ f(x)`.
