@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-#!/usr/bin/env bash
 set -e
 
 python scripts/train.py --variant hyp-mlp \
