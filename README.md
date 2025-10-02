@@ -29,38 +29,41 @@ We operate on the **Poincaré ball**; each hyperbolic block has its own (fixed o
 - **Optimizers.** Euclidean params → AdamW; manifold params → Geoopt RiemannianAdam; separate grad clipping.
 - **Precision.** AMP on; optional *hAMP* inside hyperbolic ops.
 - **Clipping.** `t=0.985`.
-
+ 
 ## 4. Variants (what to run)
-We expose ablations via `--variant`:
+Ablations are **progressive** unless stated otherwise:
 
 - `euclid` — pure baseline
-- `hyp-residual-nocenter` — hyperbolic residual around the origin
-- `hyp-residual-centered` — centered hyperbolic residual (learnable `p`)
-- `hyp-only-residual-centered` — **only** the residual is hyperbolic; everything else stays Euclidean
-- `hyp-head`, `hyp-pos`, `hyp-mlp`, `hyp-attn` — single‑block ablations
+- `hyp-head` → **Head**
+- `hyp-pos` → **Head + Pos**
+- `hyp-residual-nocenter` → **Head + Pos + Residual (no center)**
+- `hyp-residual-centered` → **Head + Pos + Residual (centered)**
+- `hyp-only-residual-centered` — **only the residual** is hyperbolic; everything else stays Euclidean
+- `hyp-mlp` → **Head + Pos + Residual + MLP**
+- `hyp-attn` → **Head + Pos + Residual + MLP + Attention**
 - `hyp-all` — all hyperbolic blocks enabled
 
-### Commands
+### Commands (use the provided .sh)
 ```bash
 # Baseline
-python scripts/train.py --variant euclid -c configs/train/euclid.yaml
+bash scripts/ablations/euclid.sh
+
+# Head 
+bash scripts/ablations/head.sh
+
+# Positional
+bash scripts/ablations/pos.sh
 
 # Residual ablations
-python scripts/train.py --variant hyp-residual-nocenter    -c configs/train/hyp_residual_nocenter.yaml
-python scripts/train.py --variant hyp-residual-centered    -c configs/train/hyp_residual_centered.yaml
-python scripts/train.py --variant hyp-only-residual-centered -c configs/train/hyp_only_residual_centered.yaml
+bash scripts/ablations/residual_nocenter.sh
+bash scripts/ablations/residual_centered.sh
+bash scripts/ablations/residual_only_centered.sh   # special branch: only residual is hyperbolic
 
-# Head / Positional
-python scripts/train.py --variant hyp-head -c configs/train/hyp_head.yaml
-python scripts/train.py --variant hyp-pos  -c configs/train/hyp_pos.yaml
-
-# MLP
-python scripts/train.py --variant hyp-mlp  -c configs/train/hyp_linear.yaml
+# MLP (Hyperbolic Linear)
+bash scripts/ablations/linear.sh
 
 # Attention (two-phase schedule)
 bash scripts/ablations/attn.sh
-```
-
 Evaluate a checkpoint:
 ```bash
 python scripts/eval.py --variant hyp-residual-centered --ckpt experiments/residual_centered/h_residual_centered.pth
