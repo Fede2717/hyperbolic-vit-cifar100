@@ -64,7 +64,8 @@ bash scripts/ablations/linear.sh
 
 # Attention (two-phase schedule)
 bash scripts/ablations/attn.sh
-Evaluate a checkpoint:
+
+# Evaluate a checkpoint:
 ```bash
 python scripts/eval.py --variant hyp-residual-centered --ckpt experiments/residual_centered/h_residual_centered.pth
 ```
