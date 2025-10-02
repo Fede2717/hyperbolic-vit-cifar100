@@ -1,7 +1,7 @@
 
 # Hyperbolic ViT on CIFAR‑100
 
-**Goal.** Turn a ViT‑Tiny baseline into a *hyperbolic* ViT on CIFAR‑100 and measure **where** non‑Euclidean geometry helps under a fixed parameter budget. We keep the backbone and number of parameters constant and ablate modules one at a time.
+**Goal.** Turn a ViT‑Tiny baseline into a *hyperbolic* ViT on CIFAR‑100 and measure **where** non‑Euclidean geometry helps under a fixed parameter budget.  We keep the backbone and number of parameters constant and run a **progressive ablation**: each variant **adds** the next hyperbolic block on top of the previous ones (Head → Pos → Residual → MLP → Attention).  
 
 **Main takeaway.** A **centered hyperbolic residual** (residual around a learnable barycenter) delivers the largest Top‑1 gain at equal params. Other hyperbolic blocks (head, positional, MLP, attention) show different accuracy/compute trade‑offs.
 
