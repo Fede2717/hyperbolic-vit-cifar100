@@ -88,13 +88,18 @@ python scripts/eval.py --variant hyp-residual-centered --ckpt experiments/residu
 ```
 configs/                       # YAMLs (base + per-variant training configs)
 hypervit/                      # library code (ViT backbone + hyperbolic modules)
+  data/                        # CIFAR-100 dataloader (transforms, loaders)
   models/                      # head, pos, residual (center/no-center), MLP, attention
   utils/                       # manifold helpers (pre/post clipping, etc.)
 scripts/                       # train/eval entrypoints + ablation shell scripts
 tests/                         # tiny sanity tests (forward/eval/progressive build)
 weights/                       # (empty) checkpoints are published in GitHub Releases
+.github/workflows/             # CI (pytest) for sanity
+CITATION.cff                   # citation metadata
 README.md
 requirements.txt
+.gitignore
+LICENSE
 ```
 
 ## 7. Checkpoints & scripts
