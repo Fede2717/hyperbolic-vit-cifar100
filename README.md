@@ -75,8 +75,8 @@ python scripts/eval.py --variant hyp-residual-centered --ckpt experiments/residu
 | Setting                                  | Ep | Val Loss | Top-1 | Top-5 | Total time | imgs/s | pball | hball |
 |------------------------------------------|:--:|:--------:|:-----:|:-----:|:----------:|:------:|:-----:|:-----:|
 | **Euclidean baseline (reference)**       |100 | 2.5203   | 53.10 | 79.04 | 1h07m      | 1327.8 |   —   |   —   |
-| Hyperbolic **positional** only           |100 | 3.5538   | 45.11 | 72.35 | 1h19m      | 1133.3 | 1.72  | 1.47  |
 | Hyperbolic **head** only                 |100 | 3.6272   | 50.16 | 76.46 | 1h15m      | 1225.3 |   —   | 1.54  |
+| Hyperbolic **positional** only           |100 | 3.5538   | 45.11 | 72.35 | 1h19m      | 1133.3 | 1.72  | 1.47  |
 | Residual **no center**                   |100 | 2.7884   | 55.37 | 81.55 | 4h28m      | 332.5  | 1.79  | 0.99  |
 | Residual **with center**                 |100 | 2.6093   | **57.39** | 82.99 | 8h05m      | 177.0  | 1.91  | 0.99  |
 | **Only residual** (rest Euclid, centered)|100 | 2.6113   | 57.37 | 82.94 | 7h30m      | 180.0  | 1.91  | 0.99  |
