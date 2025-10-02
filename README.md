@@ -70,21 +70,18 @@ bash scripts/ablations/attn.sh
 python scripts/eval.py --variant hyp-residual-centered --ckpt experiments/residual_centered/h_residual_centered.pth
 ```
 
-## 5. Results (CIFAR‑100, ViT‑Tiny, **100 epochs**)
-(*This table includes your most recent runs; MLP/Attention rows are placeholders until we add the updated numbers*.)
+## 5. Results (CIFAR-100, ViT-Tiny, **100 epochs**)
 
-| Setting                                  | Ep | Val Loss | Top‑1 | Top‑5 | Total time | imgs/s | pball | hball |
+| Setting                                  | Ep | Val Loss | Top-1 | Top-5 | Total time | imgs/s | pball | hball |
 |------------------------------------------|:--:|:--------:|:-----:|:-----:|:----------:|:------:|:-----:|:-----:|
-| **Euclidean baseline (reference)**       |100 |    —     | 53.10 |   —   |     —      |   —    |   —   |   —   |
+| **Euclidean baseline (reference)**       |100 | 2.5203   | 53.10 | 79.04 | 1h07m      | 1327.8 |   —   |   —   |
+| Hyperbolic **positional** only           |100 | 3.5538   | 45.11 | 72.35 | 1h19m      | 1133.3 | 1.72  | 1.47  |
+| Hyperbolic **head** only                 |100 | 3.6272   | 50.16 | 76.46 | 1h15m      | 1225.3 |   —   | 1.54  |
 | Residual **no center**                   |100 | 2.7884   | 55.37 | 81.55 | 4h28m      | 332.5  | 1.79  | 0.99  |
-| Residual **with center**                 | 97 | 2.6093   | **57.39** | 82.99 | 8h05m      | 177.0  | 1.91  | 0.99  |
-| **Only residual** (rest Euclid, centered)| 98 | 2.6113   | 57.37 | 82.94 | 7h30m      | 180.0  | 1.91  | 0.99  |
-| Hyperbolic **positional** only           |100 | 3.5538   | 45.11 | 72.35 | 44.05s     | 1133.3 | 1.72  | 1.47  |
-| Hyperbolic **head** only                 | 98 | 3.6272   | 50.16 | 76.46 | 40.74s     | 1225.3 |   —   | 1.54  |
-| Hyperbolic **MLP** only                  |100 |    —     |   —   |   —   |     —      |   —    |   —   |   —   |
-| Hyperbolic **Attention** only            |100 |    —     |   —   |   —   |     —      |   —    |   —   |   —   |
-
-> Note: total wall‑clock time for **head** and **positional** is equal in our runs.
+| Residual **with center**                 |100 | 2.6093   | **57.39** | 82.99 | 8h05m      | 177.0  | 1.91  | 0.99  |
+| **Only residual** (rest Euclid, centered)|100 | 2.6113   | 57.37 | 82.94 | 7h30m      | 180.0  | 1.91  | 0.99  |
+| Hyperbolic **MLP** only                  |100 | 1.7604   | 53.92 | 82.23 | 23h44m     | 60.1   | 2.48  | 0.82  |
+| Hyperbolic **Attention** only            |100 | 2.0386   | 45.76 | 76.94 | 21h05m     | 12.4   | 2.48  | 0.81  |
 
 ## 6. Repository layout
 ```
