@@ -40,7 +40,7 @@ def evaluate(model: nn.Module, loader: DataLoader, device: torch.device):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--variant", type=str, default="euclid", choices=["euclid","hyp-head","hyp-pos", 
-                                                                     "hyp-residual-centered","hyp-residual-nocenter_x","hyp-residual-nocenter_0","hyp-only-residual-centered", "hyp-mlp","hyp-attn","hyp-all"])
+                                                                     "hyp-residual-centered","hyp-residual-nocenter-x","hyp-residual-nocenter-0","hyp-only-residual-centered", "hyp-mlp","hyp-attn","hyp-all"])
     p.add_argument("--ckpt", type=str, required=True, help="Path to checkpoint (.pth)")
     p.add_argument("--batch_size", type=int, default=None)
     p.add_argument("--amp", action="store_true")
