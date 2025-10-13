@@ -7,7 +7,7 @@ import geoopt
 from hypervit.utils.manifold import inv_softplus, pre_clip, post_clip
 
 # HyperbolicResidualAdd
-class HyperbolicResidualNoCenter(nn.Module):
+class HyperbolicResidualNoCenter0(nn.Module):
     """
      x ⊕ (gamma ⊗_p y) without a learned center p and scale gamma.
     """
