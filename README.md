@@ -14,8 +14,9 @@
 ## 2. Hyperbolic Modules (what we swap)
 We operate on the **Poincaré ball**; each hyperbolic block has its own (fixed or learnable) curvature. We enforce **pre/post clipping** around exp/log maps and use AMP by default (optional *hAMP* inside manifold ops).
 
-- **Residual (three modes).**
-  - **No‑center (Hyp).** Mӧbius add around the origin: `x ⊕ f(x)`.
+- **Residual (four modes).**
+  - **No‑center-0 (Hyp).** Mӧbius add around the origin: `x ⊕ f(x)`.
+  - **No‑center-x (Hyp).**
   - **Centered (Hyp).** Learn a barycenter `p`; compose via `exp_p( log_p(x) + log_p(f(x)) )`.
   - **Only‑residual (Hyp).** *Only* the residual is hyperbolic; all other blocks stay Euclidean.
 - **Head (Hyp).** Class prototypes on the ball; distance‑based logits; learnable curvature/temperature.
@@ -36,7 +37,10 @@ Ablations are **progressive** unless stated otherwise:
 - `euclid` — pure baseline
 - `hyp-head` → **Head**
 - `hyp-pos` → **Head + Pos**
-- `hyp-residual-nocenter` → **Head + Pos + Residual (no center)**
+- 
+- `hyp-residual-nocenter-x` → **Head + Pos + Residual (no center)**
+- `hyp-residual-nocenter-x` → **Head + Pos + Residual (no center)**
+- 
 - `hyp-residual-centered` → **Head + Pos + Residual (centered)**
 - `hyp-only-residual-centered` — **only the residual** is hyperbolic; everything else stays Euclidean
 - `hyp-mlp` → **Head + Pos + Residual + MLP**
@@ -55,7 +59,8 @@ bash scripts/ablations/head.sh
 bash scripts/ablations/pos.sh
 
 # Residual ablations
-bash scripts/ablations/residual_nocenter.sh
+bash scripts/ablations/residual_nocenter_0.sh
+bash scripts/ablations/residual_nocenter_x.sh
 bash scripts/ablations/residual_centered.sh
 bash scripts/ablations/residual_only_centered.sh   # special branch: only residual is hyperbolic
 
@@ -72,16 +77,17 @@ python scripts/eval.py --variant hyp-residual-centered --ckpt experiments/residu
 
 ## 5. Results (CIFAR-100, ViT-Tiny)
 
-| Setting                                  | Ep | Top-1 | Top-5 | Val Loss | Train Loss |  Gap  | Total time | imgs/s | pball | hball |
-|------------------------------------------|:--:|:-----:|:-----:|:--------:|:----------:|:-----:|:----------:|:------:|:-----:|:-----:|
-| **Euclidean baseline (reference)**       |100 | 53.10 | 79.04 |  2.5203  |   0.1958   | 42.99 |   1h07m    | 1327.8 |   —   |   —   |
-| Hyperbolic **head** only                 |100 | 50.16 | 76.46 |  3.6272  |   0.1303   | 45.93 |   1h15m    | 1225.3 |   —   | 1.54  |
-| Hyperbolic **positional** only           |100 | 45.11 | 72.35 |  3.5538  |   0.3197   | 37.70 |   1h19m    | 1133.3 | 1.72  | 1.47  |
-| **Residual with center**                 |100 | 57.39 | 82.99 |  2.6093  |   0.2028   | 37.14 |   8h05m    |  177.0 | 1.91  | 0.99  |
-| **Residual no center**                   |100 | 55.37 | 81.55 |  2.7884  |   0.1921   | 41.51 |   4h28m    |  332.5 | 1.79  | 0.99  |
-| **Only residual** (rest Euclid, centered)|100 | 57.37 | 82.94 |  2.6113  |   0.1852   | 38.72 |   7h30m    |  180.0 | 1.91  | 0.99  |
-| Hyperbolic **MLP** only                  |100 | 53.92 | 82.23 |  1.7604  |   1.2199   | 21.08 |  23h44m    |  60.1  | 2.48  | 0.82  |
-| Hyperbolic **Attention** only            | 20 | 45.76 | 76.94 |  2.0386  |   1.9513   | 22.99 |  21h05m    |  12.4  | 2.48  | 0.81  |
+|| Setting                                   | Ep | Top-1 | Top-5 | Val Loss | Train Loss |  Gap  | Total time | imgs/s | pball | hball |
+|-------------------------------------------|:--:|:-----:|:-----:|:--------:|:----------:|:-----:|:----------:|:------:|:-----:|:-----:|
+| **Euclidean baseline (reference)**        |100 | 53.10 | 79.04 |  2.5203  |   0.1958   | 42.99 |   1h07m    | 1327.8 |   —   |   —   |
+| Hyperbolic **head** only                  |100 | 50.16 | 76.46 |  3.6272  |   0.1303   | 45.93 |   1h15m    | 1225.3 |   —   | 1.54  |
+| Hyperbolic **positional** only            |100 | 45.11 | 72.35 |  3.5538  |   0.3197   | 37.70 |   1h19m    | 1133.3 | 1.72  | 1.47  |
+| **Residual with center**                  |100 | 57.39 | 82.99 |  2.6093  |   0.2028   | 37.14 |   8h05m    |  177.0 | 1.91  | 0.99  |
+| **Only residual** (rest Euclid, centered) |100 | 57.37 | 82.94 |  2.6113  |   0.1852   | 38.72 |   7h30m    |  180.0 | 1.91  | 0.99  |
+| **Residual no center (at x)**             |100 | 55.37 | 81.55 |  2.7884  |   0.1921   | 41.51 |   4h28m    |  332.5 | 1.79  | 0.99  |
+| **Residual no center (at 0)**             |100 | 53.76 | 80.43 |  3.0587  |   0.1496   | 39.21 |   4h07m    |  367.2 |   —   |   —   |
+| Hyperbolic **MLP** only                   |100 | 53.92 | 82.23 |  1.7604  |   1.2199   | 21.08 |  23h44m    |  60.1  | 2.48  | 0.82  |
+| Hyperbolic **Attention** only             | 20 | 45.76 | 76.94 |  2.0386  |   1.9513   | 22.99 |  21h05m    |  12.4  | 2.48  | 0.81  |
 
 
 ## 6. Repository layout
