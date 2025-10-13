@@ -70,6 +70,7 @@ bash scripts/ablations/attn.sh
 
 # Evaluate a checkpoint:
 bash python scripts/eval.py --variant hyp-residual-centered --ckpt experiments/residual_centered/h_residual_centered.pth
+```
 
 ## 5. Results (CIFAR-100, ViT-Tiny)
 
