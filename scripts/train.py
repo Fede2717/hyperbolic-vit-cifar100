@@ -316,8 +316,8 @@ def ckpt_filename(variant: str) -> str:
         "hyp-head": "h_head.pth",
         "hyp-pos": "h_pos.pth",
         "hyp-residual-centered": "h_residual_centered.pth",
-        "hyp-residual-nocenter_x": "h_residual_nocenter_x.pth",
-        "hyp-residual-nocenter_0": "h_residual_nocenter_0.pth",
+        "hyp-residual-nocenter-x": "h_residual_nocenter_x.pth",
+        "hyp-residual-nocenter-0": "h_residual_nocenter_0.pth",
         "hyp-only-residual-centered": "h_only_residual_centered.pth",
         "hyp-mlp": "h_linear.pth",
         "hyp-all": "h_all.pth",
@@ -357,7 +357,7 @@ def train_euclid(cfg: Config, model: nn.Module, train_loader: DataLoader, val_lo
                 loss = criterion(logits, yb)
 
             if scaler:
-                scaler.scale(loss).backward(); scaler.step(optim); scaler.update()
+                scaler.scale(loss).backward()
             else:
                 loss.backward(); optimizer.step()
                 
@@ -430,7 +430,7 @@ def train_hyper(cfg: Config, model: nn.Module, train_loader: DataLoader, val_loa
     euc_params = [p for g in opt_euc.param_groups for p in g["params"]]
     man_params = [p for g in opt_man.param_groups for p in g["params"]]
 
-    scaler = GradScaler(device="cuda", enabled=True)
+    scaler = GradScaler(device="cuda", enabled=True) if GradScaler is not None else None
     criterion = nn.CrossEntropyLoss()
 
     best_val = float("inf")
