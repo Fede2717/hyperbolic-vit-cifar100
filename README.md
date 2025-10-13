@@ -92,6 +92,7 @@ python scripts/eval.py --variant hyp-residual-centered --ckpt experiments/residu
 ## 6. Repository layout
 ```
 configs/                       # YAMLs (base + per-variant training configs)
+docs/                          # report (pdf)
 hypervit/                      # library code (ViT backbone + hyperbolic modules)
   data/                        # CIFAR-100 dataloader (transforms, loaders)
   models/                      # head, pos, residual (center/no-center), MLP, attention
