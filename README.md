@@ -1,4 +1,3 @@
-
 # Hyperbolic ViT on CIFAR‑100
 
 **Goal.** Turn a ViT‑Tiny baseline into a *hyperbolic* ViT on CIFAR‑100 and measure **where** non‑Euclidean geometry helps under a fixed parameter budget.  We keep the backbone and number of parameters constant and run a **progressive ablation**: each variant **adds** the next hyperbolic block on top of the previous ones (Head → Pos → Residual → MLP → Attention).  
