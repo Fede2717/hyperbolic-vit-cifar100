@@ -15,12 +15,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
-try:
-     from torch.cuda.amp import GradScaler
-except Exception:
-     GradScaler = None
-     
 from torch.amp import autocast
+try:
+    from torch.cuda.amp import GradScaler
+except Exception:
+    GradScaler = None
 
 from hypervit.data.cifar100 import get_cifar100_loaders
 
