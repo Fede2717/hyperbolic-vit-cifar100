@@ -84,7 +84,7 @@ class Config:
 def make_factories(cfg: Config, variant: str, progressive: bool):
     use_head = variant in {"hyp-head", "hyp-all"}
     use_pos  = variant in {"hyp-pos", "hyp-all"}
-    use_res  = variant in {"hyp-residual-centered", "hyp-residual-nocenter", "hyp-all"}
+    use_res  = variant in {"hyp-residual-centered", "hyp-residual-nocenter-x", "hyp-residual-nocenter-0", "hyp-all"}
     use_mlp  = variant in {"hyp-mlp", "hyp-all"}
     use_attn = variant in {"hyp-attn", "hyp-all"}
 
@@ -101,7 +101,8 @@ def make_factories(cfg: Config, variant: str, progressive: bool):
             "hyp-head": "head",
             "hyp-pos": "pos",
             "hyp-residual-centered": "res",
-            "hyp-residual-nocenter": "res",
+            "hyp-residual-nocenter-x": "res",
+            "hyp-residual-nocenter-0": "res",
             "hyp-mlp": "mlp",
             "hyp-attn": "attn",
             "hyp-all": "attn",
@@ -150,9 +151,17 @@ def make_factories(cfg: Config, variant: str, progressive: bool):
 
     # ---- RESIDUAL (centered / no-center) ----
     if use_res:
-        if variant == "hyp-residual-nocenter":
+        if variant == "hyp-residual-nocenter-x":
             def res_factory():
-                return HyperbolicResidualNoCenter(
+                return HyperbolicResidualNoCenterx(
+                    hamp=cfg.hamp,
+                    init_c=cfg.hyp_init_c,
+                    clip_t=cfg.t,
+                )
+                
+        elif variant == "hyp-residual-nocenter-0":
+            def res_factory():
+                return HyperbolicResidualNoCenter0(
                     hamp=cfg.hamp,
                     init_c=cfg.hyp_init_c,
                     clip_t=cfg.t,
@@ -302,7 +311,8 @@ def ckpt_filename(variant: str) -> str:
         "hyp-head": "h_head.pth",
         "hyp-pos": "h_pos.pth",
         "hyp-residual-centered": "h_residual_centered.pth",
-        "hyp-residual-nocenter": "h_residual_nocenter.pth",
+        "hyp-residual-nocenter_x": "h_residual_nocenter_x.pth",
+        "hyp-residual-nocenter_0": "h_residual_nocenter_0.pth",
         "hyp-only-residual-centered": "h_only_residual_centered.pth",
         "hyp-mlp": "h_linear.pth",
         "hyp-all": "h_all.pth",
@@ -491,7 +501,7 @@ def train_hyper(cfg: Config, model: nn.Module, train_loader: DataLoader, val_loa
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--variant", type=str, default="euclid",
-                        choices=["euclid", "hyp-head", "hyp-pos", "hyp-residual-centered", "hyp-residual-nocenter",  "hyp-only-residual-centered", "hyp-mlp", "hyp-attn", "hyp-all"])
+                        choices=["euclid", "hyp-head", "hyp-pos", "hyp-residual-centered", "hyp-residual-nocenter-x", "hyp-residual-nocenter-0",  "hyp-only-residual-centered", "hyp-mlp", "hyp-attn", "hyp-all"])
     parser.add_argument("--epochs", type=int, default=None)
     parser.add_argument("--lr", type=float, default=None)
     parser.add_argument("--batch_size", type=int, default=None)
