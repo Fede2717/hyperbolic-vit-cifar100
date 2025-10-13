@@ -17,7 +17,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 try:
      from torch.cuda.amp import GradScaler
- except Exception:
+except Exception:
      GradScaler = None
      
 from torch.amp import autocast
