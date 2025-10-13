@@ -15,7 +15,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
-from torch.amp import GradScaler, autocast
+try:
+     from torch.cuda.amp import GradScaler
+ except Exception:
+     GradScaler = None
+     
+from torch.amp import autocast
 
 from hypervit.data.cifar100 import get_cifar100_loaders
 
@@ -328,7 +333,7 @@ def train_euclid(cfg: Config, model: nn.Module, train_loader: DataLoader, val_lo
     optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
     total_steps = cfg.epochs * len(train_loader)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=total_steps)
-    scaler = GradScaler(device="cuda", enabled=cfg.amp)
+    scaler = GradScaler(device="cuda", enabled=cfg.amp) if GradScaler is not None else None
     criterion = nn.CrossEntropyLoss()
 
     best_val = float("inf")
@@ -347,16 +352,25 @@ def train_euclid(cfg: Config, model: nn.Module, train_loader: DataLoader, val_lo
             xb, yb = xb.to(device, non_blocking=True), yb.to(device, non_blocking=True)
             optimizer.zero_grad(set_to_none=True)
 
-            with autocast("cuda", enabled=cfg.amp):
+            with autocast("cuda", enabled=cfg.amp and torch.cuda.is_available()):
                 logits = model(xb)
                 loss = criterion(logits, yb)
 
-            scaler.scale(loss).backward()
+            if scaler:
+                scaler.scale(loss).backward(); scaler.step(optim); scaler.update()
+            else:
+                loss.backward(); optimizer.step()
+                
             if cfg.grad_clip is not None:
-                scaler.unscale_(optimizer)
+                if scaler:
+                    scaler.unscale_(optimizer)
                 nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
-            scaler.step(optimizer)
-            scaler.update()
+
+            if scaler:
+                scaler.step(optimizer); scaler.update()
+            else:
+                optimizer.step()
+            
             scheduler.step()
 
             run_loss += loss.item()
@@ -438,7 +452,7 @@ def train_hyper(cfg: Config, model: nn.Module, train_loader: DataLoader, val_loa
         for it, (xb, yb) in enumerate(train_loader, 1):
             xb, yb = xb.to(device, non_blocking=True), yb.to(device, non_blocking=True)
 
-            with autocast('cuda', enabled=cfg.amp):
+            with autocast('cuda', enabled=cfg.amp and torch.cuda.is_available()):
                 logits = model(xb)
                 loss = criterion(logits.float(), yb)
                 loss_for_backward = loss / accum_steps
