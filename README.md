@@ -104,6 +104,7 @@ CITATION.cff                   # citation metadata
 README.md
 requirements.txt
 .gitignore
+.gitattributes
 LICENSE
 ```
 
