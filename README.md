@@ -115,5 +115,36 @@ LICENSE
   chmod +x scripts/*.sh scripts/ablations/*.sh
   ```
 
-## 8. Repro notes
+## 8: Weights
+- **Download** pretrained weights (Release assets → local `weights/`)
+```bash
+mkdir -p weights
+
+# EXAMPLES (adjust names to match your Release assets)
+curl -L -o weights/w_euclid.pth \
+  https://github.com/Fede2717/hyperbolic-vit-cifar100/releases/download/v1.0.0/w_euclid.pth
+```
+
+- **“Evaluate a checkpoint”** (align the path)
+Pick **one** style and use it consistently.
+
+- **Style 1 – from `weights/`:**
+**Evaluate a checkpoint**
+```bash
+python scripts/eval.py --variant hyp-residual-centered --ckpt weights/h_residual_centered.pth
+```
+
+- **Style 2 – from `experiments/` (after copying):**
+**Evaluate a checkpoint**
+```bash
+mkdir -p experiments/residual_centered
+cp weights/h_residual_centered.pth experiments/residual_centered/h_residual_centered.pth
+python scripts/eval.py --variant hyp-residual-centered --ckpt experiments/residual_centered/h_residual_centered.pth
+```
+- **“Repository layout”** (line for `weights/`)
+```bash
+weights/                       # local dir: download .pth from Release assets here (not versioned)
+```
+
+## 9. Repro notes
 Single‑GPU with AMP; effective batch 128 (accumulation where needed). Hyperbolic ops are heavier and numerically sensitive; clipping margins `t` are tuned per block.
