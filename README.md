@@ -67,14 +67,16 @@ bash scripts/ablations/linear.sh
 
 # Attention (two-phase schedule)
 bash scripts/ablations/attn.sh
+```
 
 # Evaluate a checkpoint:
-bash python scripts/eval.py --variant hyp-residual-centered --ckpt experiments/residual_centered/h_residual_centered.pth
+ ```bash
+python scripts/eval.py --variant hyp-residual-centered --ckpt experiments/residual_centered/h_residual_centered.pth
 ```
 
 ## 5. Results (CIFAR-100, ViT-Tiny)
 
-|| Setting                                   | Ep | Top-1 | Top-5 | Val Loss | Train Loss |  Gap  | Total time | imgs/s | pball | hball |
+| Setting                                   | Ep | Top-1 | Top-5 | Val Loss | Train Loss |  Gap  | Total time | imgs/s | pball | hball |
 |-------------------------------------------|:--:|:-----:|:-----:|:--------:|:----------:|:-----:|:----------:|:------:|:-----:|:-----:|
 | **Euclidean baseline (reference)**        |100 | 53.10 | 79.04 |  2.5203  |   0.1958   | 42.99 |   1h07m    | 1327.8 |   —   |   —   |
 | Hyperbolic **head** only                  |100 | 50.16 | 76.46 |  3.6272  |   0.1303   | 45.93 |   1h15m    | 1225.3 |   —   | 1.54  |
