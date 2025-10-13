@@ -1,9 +1,0 @@
-torch==2.2.*
-torchvision==0.17.*
-geoopt>=0.5
-tqdm
-numpy
-Pillow
-pyyaml>=6.0,<7.0
-pytest
-pytest-cov
