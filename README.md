@@ -16,7 +16,7 @@ We operate on the **Poincaré ball**; each hyperbolic block has its own (fixed o
 - **Residual (four modes).**
   - **No‑center-0 (Hyp).** Mӧbius add around the origin: `x ⊕ f(x)`.
   - **No‑center-x (Hyp).** Geodesic update at base point x: `expₓ( γ · logₓ(f(x)))`.
-  - **Centered (Hyp).** Learn a barycenter `p`; compose via `exp_p( log_p(x) + log_p(f(x)) )`.
+  - **Centered (Hyp).** Learn a barycenter `p`.
   - **Only‑residual (Hyp).** *Only* the residual is hyperbolic; all other blocks stay Euclidean.
 - **Head (Hyp).** Class prototypes on the ball; distance‑based logits; learnable curvature/temperature.
 - **Positional (Hyp).** Learnable positional vectors mapped to the ball and combined via Mӧbius addition.
